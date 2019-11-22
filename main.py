@@ -73,11 +73,9 @@ for repo in tqdm(suspect_repos, ncols=50, unit="repos"):
 
     with open("already_made_issues.txt", "a") as myfile:
         myfile.write(f"{repo}\n")
-    print(f"{index}: Making issue for: {repo}")
+    # print(f"\n{index}: Making issue for: {repo}")
 
-    print(issue[0])
-    print()
-    print("".join(issue[1:]))
+    # suspect_repos[repo][1].create_issue(title=issue[0], body="".join(issue[1:]))
 
     # must sleep to avoid rait limiting, make this number larger if you continue to hit rate limits
     time.sleep(2)
