@@ -1,9 +1,0 @@
-jordancharest/School-Work
-tayloa/CSCI1200_Spring2016
-YunheWang0813/RPI-Repository
-simonlhopkins/Data-Structures-Fall-2017
-slicktorchen/Data-Structures
-boiled-greggs/datastructures
-belsten/data-structures-F17
-jerryjacobs/datastructures
-MadaoIsMySon/DataStructures
