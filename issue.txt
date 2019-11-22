@@ -1,4 +1,0 @@
-This first line is the title of the issue
-all other lines are the body for the issue
-feel free to add as many other lines as you want
-# it even works with markdown!
