@@ -9,11 +9,13 @@ load_dotenv()
 g = Github(os.getenv("ACCESS_TOKEN"))
 
 # reads in which repos to skip
-with open("already_made_issues.txt") as f:
-    made_issue = f.readlines()
+# with open("already_made_issues.txt") as f:
+#     made_issue = f.readlines()
+
+excluded_repos = []
 with open("excluded_repos.txt") as f:
-    made_issue += f.readlines()
-made_issue = [x.strip() for x in made_issue]
+    excluded_repos += f.readlines()
+excluded_repos = [x.strip() for x in excluded_repos]
 
 # reads in the list of strings to use in the github search
 with open("search_strings.txt") as f:
@@ -26,7 +28,7 @@ with open("issue.txt") as f:
 
 suspect_repos = {}
 for line in querys:
-    if line.strip() == "":
+    if line.strip() == "" or line.strip().startswith("##"):
         continue
     query = f'"{line.strip()}" in:file'
     print("Searching:", line.strip())
@@ -36,7 +38,7 @@ for line in querys:
     for result in tqdm(results, total=results.totalCount, ncols=50, unit="files"):
         name = result.repository.full_name
 
-        if f"{name}".strip() in made_issue:
+        if f"{name}".strip() in excluded_repos:
             continue
 
         if name not in suspect_repos.keys():
@@ -44,13 +46,13 @@ for line in querys:
         suspect_repos[name][0] += 1
 
         # must sleep to avoid rait limiting, make this number larger if you continue to hit rate limits
-        time.sleep(0.5)
-
+        time.sleep(1.5)
+    time.sleep(30)
 
 index = 0
 for repo in suspect_repos:
     index += 1
-    print(f"{index}: {repo}")
+    print(f"{index}: https://github.com/{repo}")
 
 
 print('==> Repos to exclude: (eg: "4", "1 2 3").')
@@ -67,15 +69,22 @@ for repo in tqdm(suspect_repos, ncols=50, unit="repos"):
         print(f"{index}: Excluding {repo}")
         continue
 
-    if f"{repo}".strip() in made_issue:
-        print(f"{index}: Skiping {repo}, issue was made or excluded in the past")
+    if f"{repo}".strip() in excluded_repos:
+        print(f"{index}: Skiping {repo}, issue was excluded in the past")
         continue
 
-    with open("already_made_issues.txt", "a") as myfile:
-        myfile.write(f"{repo}\n")
-    # print(f"\n{index}: Making issue for: {repo}")
+    issue_user = "elihschiff"
+    if suspect_repos[repo][1].get_issues(creator=issue_user).totalCount != 0:
+        print(
+            f"{index}: Skiping {repo}, issue already made by {issue_user} on this repo"
+        )
+        continue
 
+    # with open("already_made_issues.txt", "a") as myfile:
+    #     myfile.write(f"{repo}\n")
+
+    # uncomment the next line only when you are ready to actually add issues
     # suspect_repos[repo][1].create_issue(title=issue[0], body="".join(issue[1:]))
 
     # must sleep to avoid rait limiting, make this number larger if you continue to hit rate limits
-    time.sleep(2)
+    time.sleep(10)
