@@ -8,10 +8,6 @@ from tqdm import tqdm
 load_dotenv()
 g = Github(os.getenv("ACCESS_TOKEN"))
 
-# reads in which repos to skip
-# with open("already_made_issues.txt") as f:
-#     made_issue = f.readlines()
-
 excluded_repos = []
 with open("excluded_repos.txt") as f:
     excluded_repos += f.readlines()
@@ -20,6 +16,9 @@ excluded_repos = [x.strip() for x in excluded_repos]
 # reads in the list of strings to use in the github search
 with open("search_strings.txt") as f:
     querys = f.readlines()
+
+# remove duplicate lines
+querys = list(dict.fromkeys(querys))
 
 # reads in the text to make an issue with
 # the first line of the issue is the title, all other lines are the body
@@ -46,8 +45,8 @@ for line in querys:
         suspect_repos[name][0] += 1
 
         # must sleep to avoid rait limiting, make this number larger if you continue to hit rate limits
-        time.sleep(1.5)
-    time.sleep(30)
+        time.sleep(3)
+    time.sleep(90)
 
 index = 0
 for repo in suspect_repos:
@@ -73,18 +72,16 @@ for repo in tqdm(suspect_repos, ncols=50, unit="repos"):
         print(f"{index}: Skiping {repo}, issue was excluded in the past")
         continue
 
-    issue_user = "elihschiff"
+    issue_user = g.get_user().login
     if suspect_repos[repo][1].get_issues(creator=issue_user).totalCount != 0:
         print(
             f"{index}: Skiping {repo}, issue already made by {issue_user} on this repo"
         )
         continue
 
-    # with open("already_made_issues.txt", "a") as myfile:
-    #     myfile.write(f"{repo}\n")
-
     # uncomment the next line only when you are ready to actually add issues
     # suspect_repos[repo][1].create_issue(title=issue[0], body="".join(issue[1:]))
+    # print(f"{index}: Added issue to {repo}")
 
     # must sleep to avoid rait limiting, make this number larger if you continue to hit rate limits
-    time.sleep(10)
+    time.sleep(30)
